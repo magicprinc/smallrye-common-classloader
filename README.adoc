@@ -1,0 +1,24 @@
+:ci: https://github.com/smallrye/smallrye-common/actions?query=workflow%3A%22SmallRye+Build%22
+:sonar: https://sonarcloud.io/dashboard?id=smallrye_smallrye-common
+
+image:https://github.com/smallrye/smallrye-common/workflows/SmallRye%20Build/badge.svg?branch=main[link={ci}]
+image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-common&metric=alert_status["Quality Gate Status", link={sonar}]
+image:https://img.shields.io/github/license/smallrye/smallrye-common.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://img.shields.io/maven-central/v/io.smallrye.common/smallrye-common-parent?color=green[["Central", link="https://search.maven.org/search?q=g:io.smallrye.common"]
+
+= SmallRye Common
+
+Common utilities for SmallRye projects.
+
+== Instructions
+
+Compile and test the project:
+
+[source,bash]
+----
+mvn verify
+----
+
+=== Contributing
+
+Please refer to our Wiki for the https://github.com/smallrye/smallrye-parent/wiki[Contribution Guidelines].

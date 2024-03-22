@@ -1,0 +1,95 @@
+plugins {
+	id 'java-library'
+	id 'idea'
+	id 'maven-publish'
+}
+
+group = 'io.smallrye.common'
+version = '2.3.2'
+
+java {
+	withSourcesJar()
+}
+println "[INFO] ${project.group}:${project.name}:$version  ⇒  ${tasks.jar.archiveFileName.get()} # JVM: ${System.getProperty("java.version")}  Gradle: ${gradle.gradleVersion}"
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	testImplementation 'org.junit.jupiter:junit-jupiter:latest.release'
+	testImplementation 'org.ow2.asm:asm:latest.release'
+	testImplementation 'org.jboss.shrinkwrap:shrinkwrap-api:1.+'
+	testImplementation 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.+'
+}
+
+tasks.withType(JavaCompile).configureEach { // ? gradle.projectsEvaluated {
+	options.encoding = 'UTF-8'
+	options.compilerArgs.addAll(['-Xlint:all,-serial', '-parameters', '-g', '-Xmaxwarns', '999'])
+	options.release.set(17) // javac --release 7..21 ~ libs.versions.jdk.get().toInteger()
+	options.deprecation = true
+}
+
+publishing {// https://docs.gradle.org/current/userguide/publishing_maven.html
+	publications {
+		maven(MavenPublication) {
+			from components.java
+			suppressPomMetadataWarningsFor('runtimeElements')
+		}
+	}
+}
+tasks.withType(GenerateModuleMetadata).configureEach {
+	enabled = false
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}
+
+test { //or: tasks.named('test'){ or: tasks.withType(Test).configureEach // https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.Test.html
+	dependsOn jar // бзик грэдла. Потребовал добавить, т.к. test не видел common-utils-1.155.jar
+	useJUnitPlatform()
+	testLogging {
+		// events "passed", "skipped", "failed" // PASSED, SKIPPED, FAILED
+		showStandardStreams = true // show standard out & err of the test JVM on the console
+		showExceptions = true
+		exceptionFormat = 'full'
+	}
+	enableAssertions = true
+	maxHeapSize = "1G"
+	println "[INFO] file.encoding: ${System.getProperty("file.encoding")}/${getDefaultCharacterEncoding()}, " +
+			"slf4j: ${System.getProperty("slf4j.detectLoggerNameMismatch")}, TZ: ${System.getProperty("user.timezone")}, lang: ${System.getProperty("user.language")}"
+	jvmArgs += [
+			'-XX:+EnableDynamicAgentLoading',
+			'-showversion',
+			'-XX:ActiveProcessorCount=64',
+			'-Djdk.virtualThreadScheduler.parallelism=128',
+			'-Djdk.tracePinnedThreads=full',
+			'-XX:+UseParallelGC',
+			'-XX:+HeapDumpOnOutOfMemoryError',
+			'-XX:+UseCompressedOops',
+			'-XX:-OmitStackTraceInFastThrow',
+			'-Djava.net.preferIPv4Stack=true',
+			'-XX:+DoEscapeAnalysis',
+			'-XX:CompileCommand=inline,java/lang/String.charAt',
+			'--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED',
+			'--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
+			'--add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED',
+			'--add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED',
+			'--add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED',
+			'--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED',
+			'--add-opens=java.base/java.io=ALL-UNNAMED',
+			'--add-opens=java.base/java.nio=ALL-UNNAMED',
+			'--add-opens=java.base/java.util=ALL-UNNAMED',
+			'--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
+			'--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED',
+			'--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+			'--add-opens=java.base/java.lang=ALL-UNNAMED',
+			'--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
+			'--add-opens=java.base/java.math=ALL-UNNAMED',
+			'--add-opens=java.sql/java.sql=ALL-UNNAMED',
+			'--add-opens=java.base/java.net=ALL-UNNAMED'
+	]
+	systemProperty("file.encoding", "UTF-8")
+}
