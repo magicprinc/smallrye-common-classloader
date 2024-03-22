@@ -31,7 +31,7 @@ public class ClassPathUtils {
      * @throws IOException in case of an IO failure
      */
     public static void consumeAsStreams(String resource, Consumer<InputStream> consumer) throws IOException {
-        consumeAsStreams(Thread.currentThread().getContextClassLoader(), resource, consumer);
+        consumeAsStreams(getClassLoader(), resource, consumer);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ClassPathUtils {
      * @throws IOException in case of an IO failure
      */
     public static void consumeAsPaths(String resource, Consumer<Path> consumer) throws IOException {
-        consumeAsPaths(Thread.currentThread().getContextClassLoader(), resource, consumer);
+        consumeAsPaths(getClassLoader(), resource, consumer);
     }
 
     /**
@@ -118,7 +118,7 @@ public class ClassPathUtils {
      */
     public static <R> R processAsPath(URL url, Function<Path, R> function) {
         if (JAR.equals(url.getProtocol())) {
-            final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+            final ClassLoader ccl = getClassLoader();
             try {
                 // We are loading "installed" FS providers that are loaded from the system classloader anyway
                 // To avoid potential ClassCastExceptions we are setting the context classloader to the system one
@@ -216,5 +216,11 @@ public class ClassPathUtils {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Failed to translate " + url + " to local path", e);
         }
+    }
+
+    public static ClassLoader getClassLoader () {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        return cl != null ? cl    // <^ ~ Objects.requireNonNullElseGet
+            : ClassPathUtils.class.getClassLoader();
     }
 }

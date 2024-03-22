@@ -3,6 +3,9 @@
 # ignore Maven generated target folders
 ~
 target
+.gradle/
+gradle/
+build/
 # ignore downloaded maven
 /tools/maven
 /tools/maven.zip
