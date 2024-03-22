@@ -4,9 +4,6 @@ plugins {
 	id 'maven-publish'
 }
 
-group = 'io.smallrye.common'
-version = '2.3.2'
-
 java {
 	withSourcesJar()
 }
