@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'io.smallrye.common'
-version = '2.3.2x'
+version = '2.3.2'
 
 java {
 	withSourcesJar()
